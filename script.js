@@ -34,8 +34,8 @@ form?.addEventListener('submit',async e=>{
     msg.textContent='Thank you. Your enquiry has been submitted successfully.';
     share.hidden=false;
     const encoded=encodeURIComponent(enquiry);
-    whatsapp.href='https://wa.me/?text='+encoded;
-    email.href='mailto:?subject='+encodeURIComponent('Northcoast project enquiry')+'&body='+encoded;
+    whatsapp.href='https://wa.me/254793716070?text='+encoded;
+    email.href='mailto:northcoastentertainmentmld@gmail.com?subject='+encodeURIComponent('Northcoast project enquiry')+'&body='+encoded;
     form.querySelector('button[type="submit"]').disabled=true;
     setTimeout(()=>{ location.href='/contact-success.html'; },700);
   }catch(error){
