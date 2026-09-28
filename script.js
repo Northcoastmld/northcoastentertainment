@@ -37,6 +37,7 @@ form?.addEventListener('submit',async e=>{
     whatsapp.href='https://wa.me/?text='+encoded;
     email.href='mailto:?subject='+encodeURIComponent('Northcoast project enquiry')+'&body='+encoded;
     form.querySelector('button[type="submit"]').disabled=true;
+    setTimeout(()=>{ location.href='/contact-success.html'; },700);
   }catch(error){
     msg.textContent='The enquiry could not be submitted. Please try again or use the WhatsApp/email sharing buttons after the form is available online.';
   }
