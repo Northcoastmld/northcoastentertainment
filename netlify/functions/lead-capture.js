@@ -22,6 +22,8 @@ export default async (event) => {
   const message = String(data.message || "").trim().slice(0, 5000);
 
   if (!name || !phone || !message) return json(400, { error: "Name, phone and project details are required." });
+  if (message.length < 8) return json(400, { error: "Please provide a little more project detail." });
+  if (email && !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) return json(400, { error: "Please enter a valid email address." });
 
   const id = "NC-" + Date.now().toString(36).toUpperCase();
   const lead = {
