@@ -2,4 +2,6 @@ User-agent: *
 Allow: /
 Disallow: /admin.html
 Disallow: /quotation.html
-Sitemap: /sitemap.xml
+Disallow: /.netlify/
+
+Sitemap: https://sage-selkie-c92cec.netlify.app/sitemap.xml
