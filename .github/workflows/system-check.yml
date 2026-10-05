@@ -1,0 +1,33 @@
+name: Northcoast system check
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install --ignore-scripts
+      - name: Check JavaScript
+        run: |
+          node --check script.js
+          node --check netlify/functions/lead-capture.js
+          node --check netlify/functions/admin-submissions.js
+          node --check netlify/functions/update-quote.js
+          node --check netlify/functions/operations.js
+      - name: Check required pages
+        run: |
+          test -f index.html
+          test -f ecosystem.html
+          test -f platform.html
+          test -f contact.html
+          test -f contact-success.html
+          test -f admin.html
+          test -f quotation.html
+          test -f netlify.toml
+          test -f package.json
