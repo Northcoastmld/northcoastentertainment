@@ -1,23 +1,22 @@
 import { getStore } from "@netlify/blobs";
 
-export default async (event) => {
-  const allowed = process.env.ADMIN_PASSWORD;
-  const supplied = event.headers?.["x-admin-password"] || event.headers?.["X-Admin-Password"];
-  if (!allowed || supplied !== allowed) return { statusCode: 401, headers: {"Content-Type":"application/json"}, body: JSON.stringify({error:"Unauthorized"}) };
+const json=(statusCode,body)=>({statusCode,headers:{"Content-Type":"application/json","Cache-Control":"no-store"},body:JSON.stringify(body)});
 
-  const siteId = process.env.NETLIFY_SITE_ID;
-  const token = process.env.NETLIFY_AUTH_TOKEN;
-  if (!siteId || !token) return { statusCode:500, headers:{"Content-Type":"application/json"}, body:JSON.stringify({error:"Netlify integration is not configured yet."}) };
+export default async(event)=>{
+  const allowed=process.env.ADMIN_PASSWORD;
+  const supplied=event.headers?.["x-admin-password"]||event.headers?.["X-Admin-Password"];
+  if(!allowed||supplied!==allowed)return json(401,{error:"Unauthorized"});
+  if(event.httpMethod&&event.httpMethod!=="GET")return json(405,{error:"Method not allowed"});
 
-  const url = "https://api.netlify.com/api/v1/sites/"+encodeURIComponent(siteId)+"/submissions?per_page=100";
-  const response = await fetch(url,{headers:{Authorization:"Bearer "+token,Accept:"application/json"}});
-  if(!response.ok) return {statusCode:response.status,headers:{"Content-Type":"application/json"},body:JSON.stringify({error:"Netlify submissions could not be loaded."})};
+  const store=getStore("northcoast-leads");
+  const {blobs=[]}=await store.list({limit:100});
+  const submissions=await Promise.all(blobs.map(async b=>await store.get(b.key,{type:"json"})));
+  submissions.sort((a,b)=>new Date(b?.created_at||0)-new Date(a?.created_at||0));
 
-  const submissions = await response.json();
-  const store = getStore("northcoast-quote-management");
-  const merged = await Promise.all(submissions.map(async s => {
-    const record = await store.get(String(s.id), {type:"json"});
-    return {...s, management: record || {status:"NEW",quoteAmount:"",currency:"KES",notes:"",updatedAt:null}};
+  const quoteStore=getStore("northcoast-quote-management");
+  const merged=await Promise.all(submissions.filter(Boolean).map(async s=>{
+    const management=await quoteStore.get(String(s.id),{type:"json"});
+    return {...s,management:management||{status:s.status||"NEW",currency:"KES",quoteNumber:"",items:[],notes:""}};
   }));
-  return {statusCode:200,headers:{"Content-Type":"application/json","Cache-Control":"no-store"},body:JSON.stringify({submissions:merged})};
+  return json(200,{submissions:merged});
 };
