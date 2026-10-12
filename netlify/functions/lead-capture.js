@@ -19,17 +19,19 @@ export default async (event) => {
   const phone = String(data.phone || "").trim().slice(0, 60);
   const email = String(data.email || "").trim().slice(0, 160);
   const service = String(data.service || "").trim().slice(0, 160);
+  const projectType = String(data.project_type || "").trim().slice(0, 100);
+  const timeline = String(data.timeline || "").trim().slice(0, 100);
   const message = String(data.message || "").trim().slice(0, 5000);
 
   if (!name || !phone || !message) return json(400, { error: "Name, phone and project details are required." });
   if (message.length < 8) return json(400, { error: "Please provide a little more project detail." });
-  if (email && !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) return json(400, { error: "Please enter a valid email address." });
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json(400, { error: "Please enter a valid email address." });
 
   const id = "NC-" + Date.now().toString(36).toUpperCase();
   const lead = {
     id, source: "northcoast-web", status: "NEW",
     created_at: new Date().toISOString(),
-    data: { name, phone, email, service, message }
+    data: { name, phone, email, service, project_type: projectType, timeline, message }
   };
 
   const store = getStore("northcoast-leads");
